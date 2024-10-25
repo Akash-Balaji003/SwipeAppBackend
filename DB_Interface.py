@@ -4,6 +4,9 @@ from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
 def get_db_connection():
     return mysql.connector.connect(
         host="localhost",
@@ -43,6 +46,47 @@ def register_user(user_data: dict):
     except mysql.connector.Error as err:
         connection.rollback()
         raise HTTPException(status_code=400, detail=f"Error: {err}")
+    
+    finally:
+        cursor.close()
+        connection.close()
+
+def login_user(user_data: dict):
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)  # Fetch results as dictionary
+
+    try:
+        # Check if user exists and retrieve profiles
+        query = """
+            SELECT u.user_id, u.password, u.common_name, u.phone_number, p.profile_id, p.profile_title
+            FROM Users u
+            LEFT JOIN Profiles p ON u.user_id = p.user_id
+            WHERE u.phone_number = %s
+        """
+        cursor.execute(query, (user_data['phone_number'],))
+        db_user_profiles = cursor.fetchall()
+
+        if not db_user_profiles or not verify_password(user_data['password'], db_user_profiles[0]['password']):
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+
+        # Extract user info from the first result
+        db_user = db_user_profiles[0]
+        profile_ids = [profile['profile_id'] for profile in db_user_profiles]
+        profile_titles = [profile['profile_title'] for profile in db_user_profiles]
+
+
+        # Return user details along with profile_ids
+        return {
+            "message": "Login successful",
+            "user_id": db_user['user_id'],
+            "Name": db_user['common_name'],
+            "Mobile Number": db_user['phone_number'],
+            "Profile IDs": profile_ids,
+            "Profile Titles": profile_titles,
+        }
+    
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=500, detail=f"Error: {err}")
     
     finally:
         cursor.close()
