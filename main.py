@@ -1,9 +1,9 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 import mysql.connector
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from DB_Interface import login_user, register_user
+from DB_Interface import get_profile_data, login_user, register_user
 
 app = FastAPI()
 
@@ -18,3 +18,8 @@ async def login(request: Request):
     user_data = await request.json()
     response = login_user(user_data)
     return response
+
+@app.get("/profile-data")
+async def login(data: int = Query(...)):
+    profile_data = get_profile_data(data)
+    return profile_data

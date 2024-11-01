@@ -77,7 +77,6 @@ def login_user(user_data: dict):
 
         # Return user details along with profile_ids
         return {
-            "message": "Login successful",
             "user_id": db_user['user_id'],
             "Name": db_user['common_name'],
             "Mobile Number": db_user['phone_number'],
@@ -91,3 +90,55 @@ def login_user(user_data: dict):
     finally:
         cursor.close()
         connection.close()
+
+def get_profile_data(profileID: int):
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)  # Fetch results as dictionary
+
+    try:
+        query = """
+            SELECT 
+                u.username,
+                p.profile_title,
+                p.primary_phone,
+                p.secondary_phone,
+                p.email1,
+                p.email2,
+                p.address1,
+                p.address2,
+                p.company_name,
+                p.city,
+                p.pincode,
+                p.country
+            FROM Profiles p
+            JOIN Users u ON p.user_id = u.user_id
+            WHERE p.profile_id = %s;
+        """
+        cursor.execute(query, (profileID,))
+        db_data = cursor.fetchone()  # fetchone() since we expect only one result with a unique profile_id
+
+        if db_data is None:
+            raise HTTPException(status_code=404, detail="Profile not found")
+
+        return {
+            "username": db_data['username'],
+            "profile_title": db_data['profile_title'],
+            "primary_phone": db_data['primary_phone'],
+            "secondary_phone": db_data['secondary_phone'],
+            "email1": db_data['email1'],
+            "email2": db_data['email2'],
+            "address1": db_data['address1'],
+            "address2": db_data['address2'],
+            "company_name": db_data['company_name'],
+            "city": db_data['city'],
+            "pincode": db_data['pincode'],
+            "country": db_data['country'],
+        }
+
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=500, detail=f"Error: {err}")
+    
+    finally:
+        cursor.close()
+        connection.close()
+
