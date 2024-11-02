@@ -9,9 +9,14 @@ app = FastAPI()
 
 @app.post("/register")
 async def register(request: Request):
-    user_data = await request.json()
-    register_user(user_data)
-    return {"message": "User registered successfully"}
+    try:
+        user_data = await request.json()
+        print("Received user data:", user_data)  # Debugging
+        register_user(user_data)
+        return {"message": "User registered successfully"}
+    except Exception as e:
+        print("Error:", str(e))  # Debugging
+        raise HTTPException(status_code=400, detail=f"Bad request: {str(e)}")
 
 @app.post("/login")
 async def login(request: Request):
