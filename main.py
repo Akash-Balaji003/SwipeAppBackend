@@ -1,5 +1,8 @@
+import base64
+import qrcode
+from io import BytesIO
 from fastapi import FastAPI, HTTPException, Query, Request
-import mysql.connector
+import json
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
@@ -25,6 +28,20 @@ async def login(request: Request):
     return response
 
 @app.get("/profile-data")
-async def login(data: int = Query(...)):
+async def profile(data: int = Query(...)):
     profile_data = get_profile_data(data)
     return profile_data
+
+@app.get("/get-qr")
+async def qrGenerator(data: int = Query(...)):
+    profile_data = get_profile_data(data)
+    json_data = json.dumps(profile_data)
+    qr_img = qrcode.make(json_data)
+
+    buffered = BytesIO()
+    qr_img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    
+    # Return the Base64 string as a JSON response
+    return {"qr_code_base64": img_str}
+    

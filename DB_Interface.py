@@ -109,7 +109,9 @@ def get_profile_data(profileID: int):
     try:
         query = """
             SELECT 
+                u.user_id,
                 u.common_name,
+                p.profile_id,
                 p.profile_title,
                 p.primary_phone,
                 p.secondary_phone,
@@ -132,7 +134,9 @@ def get_profile_data(profileID: int):
             raise HTTPException(status_code=404, detail="Profile not found")
 
         return {
+            "user_id": db_data['user_id'],
             "common_name": db_data['common_name'],
+            "profile_id": db_data['profile_id'],
             "profile_title": db_data['profile_title'],
             "primary_phone": db_data['primary_phone'],
             "secondary_phone": db_data['secondary_phone'],
