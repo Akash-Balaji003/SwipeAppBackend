@@ -156,3 +156,123 @@ def get_profile_data(profileID: int):
     finally:
         cursor.close()
         connection.close()
+
+def add_friend(profile_id1: int, profile_id2: int):
+    if profile_id1 == profile_id2:
+        print("A profile cannot friend itself.")
+        return{"message":"A profile cannot friend itself."}
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        # Check if profiles belong to the same user
+        cursor.execute(
+            """
+            SELECT user_id FROM profiles WHERE profile_id = %s
+            """, (profile_id1,)
+        )
+        user_id1 = cursor.fetchone()[0]
+
+        cursor.execute(
+            """
+            SELECT user_id FROM profiles WHERE profile_id = %s
+            """, (profile_id2,)
+        )
+        user_id2 = cursor.fetchone()[0]
+
+        if user_id1 == user_id2:
+            print("Profiles from the same user cannot be friends.")
+            return {"message":"Profiles from the same user cannot be friends."}
+
+        # Ensure the friendship doesn't already exist
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM friends
+            WHERE (profile_id1 = %s AND profile_id2 = %s)
+               OR (profile_id1 = %s AND profile_id2 = %s)
+            """,
+            (profile_id1, profile_id2, profile_id2, profile_id1)
+        )
+        exists = cursor.fetchone()[0]
+
+        if exists:
+            print("These profiles are already friends.")
+            return {"message":"These profiles are already friends."}
+
+        # Insert the friendship
+        cursor.execute(
+            """
+            INSERT INTO friends (profile_id1, profile_id2)
+            VALUES (%s, %s)
+            """,
+            (profile_id1, profile_id2)
+        )
+        connection.commit()
+        print("Friend added successfully.")
+        return{"message":"Friend added successfully"}
+
+    except mysql.connector.Error as err:
+        print("Error: ", err)
+    finally:
+        cursor.close()
+        connection.close()
+
+def remove_friend(profile_id1: int, profile_id2: int):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            DELETE FROM friends
+            WHERE (profile_id1 = %s AND profile_id2 = %s)
+               OR (profile_id1 = %s AND profile_id2 = %s)
+            """,
+            (profile_id1, profile_id2, profile_id2, profile_id1)
+        )
+        connection.commit()
+
+        if cursor.rowcount > 0:
+            print("Friend removed successfully.")
+            return{"message":"Friend removed successfully"}
+        else:
+            print("Friendship does not exist.")
+            return{"message":"You are not friends"}
+
+    except mysql.connector.Error as err:
+        print("Error: ", err)
+    finally:
+        cursor.close()
+        connection.close()
+
+def get_friends(profile_id: int):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            SELECT 
+                CASE 
+                    WHEN profile_id1 = %s THEN profile_id2
+                    ELSE profile_id1
+                END AS friend_profile_id
+            FROM friends
+            WHERE profile_id1 = %s OR profile_id2 = %s
+            """,
+            (profile_id, profile_id, profile_id)
+        )
+        friends = cursor.fetchall()
+        friend_ids = [row[0] for row in friends]
+        
+        print("Friends found:", friend_ids)
+        return friend_ids
+
+    except mysql.connector.Error as err:
+        print("Error: ", err)
+        return []
+    finally:
+        cursor.close()
+        connection.close()
