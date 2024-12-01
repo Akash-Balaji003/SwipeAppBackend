@@ -6,7 +6,7 @@ import json
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from DB_Interface import add_friend, get_profile_data, login_user, register_user, remove_friend
+from DB_Interface import add_friend, get_friends, get_friends_with_details, get_profile_data, login_user, register_user, remove_friend
 
 app = FastAPI()
 
@@ -54,3 +54,8 @@ async def addFriend(data1: int = Query(...), data2: int = Query(...)):
 async def removeFriend(data1: int = Query(...), data2: int = Query(...)):
     remove_friend_result = remove_friend(data1, data2)
     return remove_friend_result
+
+@app.get("/get-friend")
+async def profile(data: int = Query(...)):
+    get_fnd_data = get_friends_with_details(data)
+    return get_fnd_data
