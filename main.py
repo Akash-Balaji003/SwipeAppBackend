@@ -6,7 +6,7 @@ import json
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from DB_Interface import add_friend, get_friends, get_friends_with_details, get_profile_data, login_user, register_user, remove_friend
+from DB_Interface import add_friend, add_friend2, get_friends, get_friends_with_details, get_profile_data, login_user, register_user, remove_friend
 
 app = FastAPI()
 
@@ -46,8 +46,8 @@ async def qrGenerator(data: int = Query(...)):
     return {"qr_code_base64": img_str}
 
 @app.get("/add-friend")
-async def addFriend(data1: int = Query(...), data2: int = Query(...)):
-    add_friend_result = add_friend(data1, data2)
+async def addFriend(data1: int = Query(...), data2: int = Query(...), remarks: str = Query(...)):
+    add_friend_result = add_friend2(data1, data2, remarks)
     return add_friend_result
 
 @app.get("/remove-friend")

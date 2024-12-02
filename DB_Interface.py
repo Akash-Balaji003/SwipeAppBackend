@@ -9,10 +9,11 @@ def verify_password(plain_password, hashed_password):
 
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Akash003!",
-        database="swipe"
+        host="swipe-mysql-server.mysql.database.azure.com",
+        port=3306,
+        username="Swipeadmin",
+        password="Swipeadmin123",
+        database="swipe_schema"
     )
 
 def hash_password(password: str):
@@ -314,8 +315,73 @@ def get_friends_with_details(profile_id: int):
         return friends
 
     except Exception as e:
+        print("Database error:", e)
         print("Error fetching friends:", e)
         raise
+    finally:
+        cursor.close()
+        connection.close()
+
+def add_friend2(profile_id1: int, profile_id2: int, remarks: str):
+    if profile_id1 == profile_id2:
+        print("A profile cannot friend itself.")
+        return {"message": "A profile cannot friend itself."}
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        # Check if profiles belong to the same user
+        cursor.execute(
+            """
+            SELECT user_id FROM profiles WHERE profile_id = %s
+            """, (profile_id1,)
+        )
+        user_id1 = cursor.fetchone()[0]
+
+        cursor.execute(
+            """
+            SELECT user_id FROM profiles WHERE profile_id = %s
+            """, (profile_id2,)
+        )
+        user_id2 = cursor.fetchone()[0]
+
+        if user_id1 == user_id2:
+            print("Profiles from the same user cannot be friends.")
+            return {"message": "Profiles from the same user cannot be friends."}
+
+        # Ensure the friendship doesn't already exist
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM friends
+            WHERE (profile_id1 = %s AND profile_id2 = %s)
+               OR (profile_id1 = %s AND profile_id2 = %s)
+            """,
+            (profile_id1, profile_id2, profile_id2, profile_id1)
+        )
+        exists = cursor.fetchone()[0]
+
+        if exists:
+            print("These profiles are already friends.")
+            return {"message": "These profiles are already friends."}
+
+        # Insert the friendship along with remarks
+        cursor.execute(
+            """
+            INSERT INTO friends (profile_id1, profile_id2, remarks)
+            VALUES (%s, %s, %s)
+            """,
+            (profile_id1, profile_id2, remarks)
+        )
+        connection.commit()
+        print("Friend added successfully.")
+        return {"message": "Friend added successfully"}
+
+    except mysql.connector.Error as err:
+        print("Error: ", err)
+        return {"message": f"Error: {err}"}
+
     finally:
         cursor.close()
         connection.close()
