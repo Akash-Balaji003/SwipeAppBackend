@@ -3,10 +3,8 @@ import qrcode
 from io import BytesIO
 from fastapi import FastAPI, HTTPException, Query, Request
 import json
-from passlib.context import CryptContext
-from pydantic import BaseModel
 
-from DB_Interface import add_friend, add_friend2, get_friends, get_friends_with_details, get_profile_data, login_user, register_user, remove_friend
+from DB_Interface import add_friend2, get_friends_with_details, get_profile_data, login_user, register_user, remove_friend
 
 app = FastAPI()
 
