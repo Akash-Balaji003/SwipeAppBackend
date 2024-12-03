@@ -250,44 +250,6 @@ def remove_friend(profile_id1: int, profile_id2: int):
 
 def get_friends(profile_id: int):
     connection = get_db_connection()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute(
-            """
-            SELECT 
-                CASE 
-                    WHEN f.profile_id1 = %s THEN f.profile_id2
-                    ELSE f.profile_id1
-                END AS friend_profile_id,
-                p.profile_title,
-                u.common_name
-            FROM friends f
-            JOIN profiles p ON p.profile_id = 
-                CASE 
-                    WHEN f.profile_id1 = %s THEN f.profile_id2
-                    ELSE f.profile_id1
-                END
-            JOIN users u ON u.user_id = p.user_id
-            WHERE f.profile_id1 = %s OR f.profile_id2 = %s
-            """,
-            (profile_id, profile_id, profile_id)
-        )
-        friends = cursor.fetchall()
-        friend_ids = [row[0] for row in friends]
-        
-        print("Friends found:", friend_ids)
-        return friend_ids
-
-    except mysql.connector.Error as err:
-        print("Error: ", err)
-        return []
-    finally:
-        cursor.close()
-        connection.close()
-
-def get_friends_with_details(profile_id: int):
-    connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)  # Use dictionary=True to return results as dicts
 
     try:
@@ -382,6 +344,43 @@ def add_friend2(profile_id1: int, profile_id2: int, remarks: str):
         print("Error: ", err)
         return {"message": f"Error: {err}"}
 
+    finally:
+        cursor.close()
+        connection.close()
+
+def get_friends2(profile_id: int):
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)  # Use dictionary=True to return results as dicts
+
+    try:
+        query = """
+            SELECT 
+                CASE 
+                    WHEN f.profile_id1 = %s THEN f.profile_id2
+                    ELSE f.profile_id1
+                END AS friend_profile_id,
+                p.profile_title,
+                u.common_name
+            FROM friends f
+            JOIN profiles p ON p.profile_id = 
+                CASE 
+                    WHEN f.profile_id1 = %s THEN f.profile_id2
+                    ELSE f.profile_id1
+                END
+            JOIN users u ON u.user_id = p.user_id
+            WHERE f.profile_id1 = %s OR f.profile_id2 = %s
+        """
+        cursor.execute(query, (profile_id, profile_id, profile_id, profile_id))
+        friends = cursor.fetchall()
+        
+        if not friends:
+            print(f"No friends found for profile {profile_id}")
+        print("Friends found:", friends)
+        return friends
+
+    except Exception as e:
+        print("Database error:", e)
+        return []
     finally:
         cursor.close()
         connection.close()
