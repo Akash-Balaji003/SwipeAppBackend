@@ -57,3 +57,7 @@ async def removeFriend(data1: int = Query(...), data2: int = Query(...)):
 async def profile(data: int = Query(...)):
     get_fnd_data = get_friends_with_details(data)
     return get_fnd_data
+
+@app.get("/test")
+async def test():
+    return {"Test": "Working"}
