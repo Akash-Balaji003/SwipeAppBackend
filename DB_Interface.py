@@ -16,6 +16,15 @@ def get_db_connection():
         database="swipe_schema"
     )
 
+def get_db_connection_Digi():
+    return mysql.connector.connect(
+        host="digivcard.mysql.database.azure.com",
+        port=3306,
+        username="digicard",
+        password="Raviswaminathan123@",
+        database="DigiVcard"
+    )
+
 def hash_password(password: str):
     return pwd_context.hash(password)
 
@@ -104,7 +113,7 @@ def login_user(user_data: dict):
         connection.close()
 
 def get_profile_data(profileID: int):
-    connection = get_db_connection()
+    connection = get_db_connection_Digi()
     cursor = connection.cursor(dictionary=True)  # Fetch results as dictionary
 
     try:
