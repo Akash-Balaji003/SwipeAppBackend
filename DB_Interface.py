@@ -9,15 +9,6 @@ def verify_password(plain_password, hashed_password):
 
 def get_db_connection():
     return mysql.connector.connect(
-        host="swipe-mysql-server.mysql.database.azure.com",
-        port=3306,
-        username="Swipeadmin",
-        password="Swipeadmin123",
-        database="swipe_schema"
-    )
-
-def get_db_connection_Digi():
-    return mysql.connector.connect(
         host="digivcard.mysql.database.azure.com",
         port=3306,
         username="digicard",
@@ -113,7 +104,7 @@ def login_user(user_data: dict):
         connection.close()
 
 def get_profile_data(profileID: int):
-    connection = get_db_connection_Digi()
+    connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)  # Fetch results as dictionary
 
     try:
