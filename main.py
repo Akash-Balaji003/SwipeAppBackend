@@ -65,4 +65,3 @@ async def profile(data: int = Query(...)):
 @app.get("/test")
 async def test():
     return {"Test": "Working"}
-
