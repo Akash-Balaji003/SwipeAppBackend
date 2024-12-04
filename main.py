@@ -36,13 +36,19 @@ async def profile(data: int = Query(...)):
 
 @app.get("/get-qr")
 async def qrGenerator(data: int = Query(...)):
+    logging.info("QR data endpoint hit")
     profile_data = get_profile_data(data)
+    logging.info("Profile data function called")
     json_data = json.dumps(profile_data)
+    logging.info("json data formed")
     qr_img = qrcode.make(json_data)
-
+    logging.info("QR formed")
     buffered = BytesIO()
+    logging.info("BytesIO call")
     qr_img.save(buffered, format="PNG")
+    logging.info("QR saved")
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    logging.info("QR transformed to base64")
     
     # Return the Base64 string as a JSON response
     return {"qr_code_base64": img_str}
