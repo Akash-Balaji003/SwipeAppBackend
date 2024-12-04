@@ -3,7 +3,8 @@ import qrcode
 from io import BytesIO
 from fastapi import FastAPI, HTTPException, Query, Request
 import json
-
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 from DB_Interface import add_friend2, get_friends, get_profile_data, login_user, register_user, remove_friend
 
@@ -28,7 +29,9 @@ async def login(request: Request):
 
 @app.get("/profile-data")
 async def profile(data: int = Query(...)):
+    logging.info("Profile data endpoint hit")
     profile_data = get_profile_data(data)
+    logging.info("Profile data endpoint after function call")
     return profile_data
 
 @app.get("/get-qr")
