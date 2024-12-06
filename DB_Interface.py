@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 import mysql.connector
 from passlib.context import CryptContext
+from pymysql import NULL
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -337,7 +338,6 @@ def add_friend2(profile_id1: int, profile_id2: int, remarks: str):
             (profile_id1, profile_id2, remarks)
         )
         connection.commit()
-        print("Friend added successfully.")
         return {"message": "Friend added successfully"}
 
     except mysql.connector.Error as err:
@@ -347,3 +347,71 @@ def add_friend2(profile_id1: int, profile_id2: int, remarks: str):
     finally:
         cursor.close()
         connection.close()
+
+def update_profile(profile_data: dict):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        # Update the Profiles table with the provided data
+        query = """
+        UPDATE Profiles
+        SET 
+            profile_title = %s,
+            qualification = %s,
+            designation = %s,
+            company_name = %s,
+            primary_phone = %s,
+            secondary_phone = %s,
+            email1 = %s,
+            email2 = %s,
+            address1 = %s,
+            city = %s,
+            pincode = %s,
+            country = %s
+        WHERE profile_id = %s
+        """
+        cursor.execute(query, (
+            profile_data['profile_title'],
+            profile_data['qualification'],
+            profile_data['designation'],
+            profile_data['company_name'],
+            profile_data['primary_phone'],
+            profile_data.get('secondary_phone'),  # Optional field
+            profile_data['email1'],
+            profile_data.get('email2'),  # Optional field
+            profile_data['address1'],
+            profile_data['city'],
+            profile_data['pincode'],
+            profile_data['country'],
+            profile_data['profile_id']  # Using profile_id as the identifier
+        ))
+
+        connection.commit()
+        return {"message": "Updated the profile successfully"}
+    
+    except mysql.connector.Error as err:
+        connection.rollback()
+        print("Database error:", err)  # Debugging
+        raise HTTPException(status_code=400, detail=f"Database error: {err}")
+    
+    finally:
+        cursor.close()
+        connection.close()
+
+update_profile({
+    "profile_id": 1,
+    "profile_title": "Manager",
+    "primary_phone": "12345123445",
+    "secondary_phone": NULL,
+    "email1": "doe@example.com",
+    "email2": NULL,
+    "address1": "123 Main St, Suite 100",
+    "company_name": "Doe's Services Inc.",
+    "designation": "Team Lead",
+    "qualification": "MBA",
+    "city": "New York",
+    "pincode": "10001",
+    "country": "USA"
+}
+)

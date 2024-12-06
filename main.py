@@ -6,7 +6,7 @@ import json
 import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-from DB_Interface import add_friend2, get_friends, get_profile_data, login_user, register_user, remove_friend
+from DB_Interface import add_friend2, get_friends, get_profile_data, login_user, register_user, remove_friend, update_profile
 
 app = FastAPI()
 
@@ -71,3 +71,17 @@ async def profile(data: int = Query(...)):
 @app.get("/test")
 async def test():
     return {"Test": "Working"}
+
+@app.post("/update-profile")
+async def update_profile_endpoint(request: Request):
+    try:
+        profile_data = await request.json()
+        logging.info("Received profile data:", profile_data)  # Debugging
+        
+        result = update_profile(profile_data)
+        
+        return result
+    
+    except Exception as e:
+        logging.error("Error:", str(e))  # Debugging
+        raise HTTPException(status_code=400, detail=f"Bad request: {str(e)}")
