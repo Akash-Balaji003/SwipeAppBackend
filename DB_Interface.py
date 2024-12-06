@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 import mysql.connector
 from passlib.context import CryptContext
+from pymysql import NULL
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
