@@ -398,20 +398,3 @@ def update_profile(profile_data: dict):
     finally:
         cursor.close()
         connection.close()
-
-update_profile({
-    "profile_id": 1,
-    "profile_title": "Manager",
-    "primary_phone": "12345123445",
-    "secondary_phone": NULL,
-    "email1": "doe@example.com",
-    "email2": NULL,
-    "address1": "123 Main St, Suite 100",
-    "company_name": "Doe's Services Inc.",
-    "designation": "Team Lead",
-    "qualification": "MBA",
-    "city": "New York",
-    "pincode": "10001",
-    "country": "USA"
-}
-)
