@@ -5,3 +5,4 @@ mysql-connector-python==8.0.33
 passlib==1.7.4
 Pillow>=9.0.0
 PyMySQL>=1.0.0
+azure-storage-blob==12.10.0

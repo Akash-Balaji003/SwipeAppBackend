@@ -3,12 +3,32 @@ import qrcode
 from io import BytesIO
 from fastapi import FastAPI, HTTPException, Query, Request
 import json
+from azure.storage.blob import BlobServiceClient, BlobClient
+
 import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 from DB_Interface import add_friend2, get_friends, get_profile_data, login_user, register_user, remove_friend, update_profile
 
 app = FastAPI()
+
+connection_string = "DefaultEndpointsProtocol=https;AccountName=designations;AccountKey=7TGa2pK+6Do7Ehu02h0cqY7BJAQS5AfTEzzvxhLU3wp7uDNVME37yFYJYCHJbCOYy0FQJkOJsFKZ+AStnW7WFQ==;EndpointSuffix=core.windows.net"  # Get this from Azure Portal
+container_name = "designations-list"
+blob_name = "designations.json"
+
+blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+
+@app.get("/get-designations")
+async def get_designations():
+    # Download the blob
+    download_stream = blob_client.download_blob()
+    json_data = download_stream.readall().decode('utf-8')
+
+    # Parse JSON data
+    designations = json.loads(json_data)
+
+    return designations
 
 @app.post("/register")
 async def register(request: Request):
