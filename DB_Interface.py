@@ -398,3 +398,42 @@ def update_profile(profile_data: dict):
     finally:
         cursor.close()
         connection.close()
+
+def insert_card_data(card_data: dict):
+    connection = get_db_connection()  # Replace with your DB connection function
+    cursor = connection.cursor()
+
+    try:
+        # Insert into Cards table
+        query_cards = """INSERT INTO Cards (
+                            profile_id, name, card_designation, primary_phone, primary_email, 
+                            title, user_qualification, company_name, secondary_phone, 
+                            secondary_email, address, city, pincode, country
+                         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        cursor.execute(query_cards, (
+            card_data['profile_id'],
+            card_data['name'],
+            card_data.get('card_designation', None),  # Optional field
+            card_data['primary_phone'],
+            card_data['primary_email'],
+            card_data['title'],
+            card_data.get('user_qualification', None),  # Optional field
+            card_data['company_name'],
+            card_data.get('secondary_phone', None),  # Optional field
+            card_data.get('secondary_email', None),  # Optional field
+            card_data['address'],
+            card_data['city'],
+            card_data['pincode'],
+            card_data['country']
+        ))
+        
+        connection.commit()
+
+    except mysql.connector.Error as err:
+        connection.rollback()
+        print("Database error:", err)  # Debugging
+        raise HTTPException(status_code=400, detail=f"Database error: {err}")
+
+    finally:
+        cursor.close()
+        connection.close()

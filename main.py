@@ -8,7 +8,7 @@ from azure.storage.blob import BlobServiceClient, BlobClient
 import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-from DB_Interface import add_friend2, get_friends, get_profile_data, login_user, register_user, remove_friend, update_profile
+from DB_Interface import add_friend2, get_friends, get_profile_data, insert_card_data, login_user, register_user, remove_friend, update_profile
 
 app = FastAPI()
 
@@ -104,4 +104,15 @@ async def update_profile_endpoint(request: Request):
     
     except Exception as e:
         logging.error("Error:", str(e))  # Debugging
+        raise HTTPException(status_code=400, detail=f"Bad request: {str(e)}")
+
+@app.post("/store-card")
+async def register(request: Request):
+    try:
+        card_data = await request.json()
+        print("Received user data:", card_data)  # Debugging
+        insert_card_data(card_data)
+        return {"message": "Card stored successfully"}
+    except Exception as e:
+        print("Error:", str(e))  # Debugging
         raise HTTPException(status_code=400, detail=f"Bad request: {str(e)}")
