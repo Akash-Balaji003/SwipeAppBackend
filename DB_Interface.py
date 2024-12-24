@@ -437,3 +437,47 @@ def insert_card_data(card_data: dict):
     finally:
         cursor.close()
         connection.close()
+
+def search_friends(profile_id: int, search_term: str):
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        # Query to search for friends based on common_name, profile_title, or remarks
+        query = """
+        SELECT 
+            CASE 
+                WHEN f.profile_id1 = %s THEN f.profile_id2
+                ELSE f.profile_id1
+            END AS friend_profile_id,
+            p.profile_title,
+            u.common_name,
+            f.remarks
+        FROM friends f
+        JOIN profiles p ON p.profile_id = 
+            CASE 
+                WHEN f.profile_id1 = %s THEN f.profile_id2
+                ELSE f.profile_id1
+            END
+        JOIN users u ON u.user_id = p.user_id
+        WHERE (f.profile_id1 = %s OR f.profile_id2 = %s)
+          AND (
+              u.common_name LIKE %s   -- Search in user's common name
+              OR p.profile_title LIKE %s  -- Search in profile title
+              OR f.remarks LIKE %s    -- Search in remarks
+          )
+        """
+        
+        # Execute the query with search term in all fields
+        cursor.execute(query, (profile_id, profile_id, profile_id, profile_id, f"%{search_term}%", f"%{search_term}%", f"%{search_term}%"))
+        friends = cursor.fetchall()
+
+        return friends
+    
+    except mysql.connector.Error as err:
+        print("Database error:", err)
+        raise HTTPException(status_code=400, detail=f"Database error: {err}")
+    
+    finally:
+        cursor.close()
+        connection.close()
