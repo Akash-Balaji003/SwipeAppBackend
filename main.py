@@ -118,9 +118,9 @@ async def register(request: Request):
         raise HTTPException(status_code=400, detail=f"Bad request: {str(e)}")
 
 @app.get("/friends/search/")
-def searchFriends(id:int, name: str):
+def searchFriends(profile_id:int, search_query: str):
     try:
-        users = search_friends(id, name)  # Call the function to search users by name
+        users = search_friends(profile_id, search_query)  # Call the function to search users by name
         return users
     except Exception as err:
         raise HTTPException(status_code=500, detail=f"Error searching users: {err}")
