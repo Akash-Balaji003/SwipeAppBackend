@@ -408,8 +408,8 @@ def insert_card_data(card_data: dict):
         query_cards = """INSERT INTO Cards (
                             profile_id, name, card_designation, primary_phone, primary_email, 
                             title, user_qualification, company_name, secondary_phone, 
-                            secondary_email, address, city, pincode, country
-                         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                            secondary_email, address, city, pincode, country, remarks
+                         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         cursor.execute(query_cards, (
             card_data['profile_id'],
             card_data['name'],
@@ -424,7 +424,8 @@ def insert_card_data(card_data: dict):
             card_data['address'],
             card_data['city'],
             card_data['pincode'],
-            card_data['country']
+            card_data['country'],
+            card_data['remark']
         ))
         
         connection.commit()
@@ -478,6 +479,98 @@ def search_friends(profile_id: int, search_term: str):
         print("Database error:", err)
         raise HTTPException(status_code=400, detail=f"Database error: {err}")
     
+    finally:
+        cursor.close()
+        connection.close()
+
+def get_cards(profile_id: int):
+    connection = get_db_connection()  # Replace with your DB connection function
+    cursor = connection.cursor(dictionary=True)  # Use dictionary=True for a dict result
+
+    try:
+        # SQL query to fetch all cards for the given profile_id
+        query = """
+        SELECT 
+            card_id,
+            profile_id,
+            name,
+            card_designation,
+            primary_phone,
+            primary_email,
+            title,
+            user_qualification,
+            company_name,
+            secondary_phone,
+            secondary_email,
+            address,
+            city,
+            pincode,
+            country,
+            remarks
+        FROM Cards
+        WHERE profile_id = %s
+        """
+        
+        # Execute the query
+        cursor.execute(query, (profile_id,))
+        
+        # Fetch all rows and return them
+        cards = cursor.fetchall()
+        return cards
+
+    except mysql.connector.Error as err:
+        print("Database error:", err)  # Debugging
+        raise HTTPException(status_code=400, detail=f"Database error: {err}")
+
+    finally:
+        cursor.close()
+        connection.close()
+
+def search_my_cards(profile_id: int, search_term: str):
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        # SQL query to search cards for the given profile_id and search_term
+        query = """
+        SELECT 
+            c.card_id,
+            c.profile_id,
+            c.name,
+            c.card_designation,
+            c.primary_phone,
+            c.primary_email,
+            c.title,
+            c.user_qualification,
+            c.company_name,
+            c.secondary_phone,
+            c.secondary_email,
+            c.address,
+            c.city,
+            c.pincode,
+            c.country,
+            c.remarks
+        FROM Cards c
+        JOIN profiles p ON c.profile_id = p.profile_id
+        JOIN users u ON p.user_id = u.user_id
+        WHERE c.profile_id = %s
+          AND (
+              p.profile_title LIKE %s
+              OR c.remarks LIKE %s
+              OR u.common_name LIKE %s
+          )
+        """
+        
+        # Execute the query with the search term in all fields
+        cursor.execute(query, (profile_id, f"%{search_term}%", f"%{search_term}%", f"%{search_term}%"))
+        cards = cursor.fetchall()
+
+        return cards
+
+    except mysql.connector.Error as err:
+        print("Database error:", err)
+        raise HTTPException(status_code=400, detail=f"Database error: {err}")
+
     finally:
         cursor.close()
         connection.close()
