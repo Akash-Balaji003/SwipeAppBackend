@@ -8,7 +8,7 @@ from azure.storage.blob import BlobServiceClient, BlobClient
 import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-from DB_Interface import add_friend2, get_cards, get_friends, get_profile_data, insert_card_data, login_user, register_user, remove_friend, search_friends, search_my_cards, update_profile
+from DB_Interface import add_friend2, get_card_data, get_cards, get_friends, get_profile_data, insert_card_data, login_user, register_user, remove_friend, search_friends, search_my_cards, update_profile
 
 app = FastAPI()
 
@@ -137,3 +137,10 @@ def searchFriends(profile_id:int, search_query: str):
         return cards
     except Exception as err:
         raise HTTPException(status_code=500, detail=f"Error searching users: {err}")
+
+@app.get("/card-data")
+async def profile(data: int = Query(...)):
+    logging.info("Profile data endpoint hit")
+    card = get_card_data(data)
+    logging.info("Profile data endpoint after function call")
+    return card

@@ -492,20 +492,9 @@ def get_cards(profile_id: int):
         query = """
         SELECT 
             card_id,
-            profile_id,
             name,
-            card_designation,
-            primary_phone,
-            primary_email,
             title,
-            user_qualification,
             company_name,
-            secondary_phone,
-            secondary_email,
-            address,
-            city,
-            pincode,
-            country,
             remarks
         FROM Cards
         WHERE profile_id = %s
@@ -555,9 +544,9 @@ def search_my_cards(profile_id: int, search_term: str):
         JOIN users u ON p.user_id = u.user_id
         WHERE c.profile_id = %s
           AND (
-              p.profile_title LIKE %s
+              c.title LIKE %s
               OR c.remarks LIKE %s
-              OR u.common_name LIKE %s
+              OR c.name LIKE %s
           )
         """
         
@@ -571,6 +560,37 @@ def search_my_cards(profile_id: int, search_term: str):
         print("Database error:", err)
         raise HTTPException(status_code=400, detail=f"Database error: {err}")
 
+    finally:
+        cursor.close()
+        connection.close()
+
+def get_card_data(card_id: int):
+    connection = get_db_connection()  # Replace with your DB connection function
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        # Query to fetch card data for the specific card_id
+        query = """
+        SELECT 
+            name, card_designation, primary_phone, primary_email,
+            title, user_qualification, company_name, secondary_phone,
+            secondary_email, address, city, pincode, country, remarks
+        FROM Cards
+        WHERE card_id = %s
+        """
+        
+        cursor.execute(query, (card_id,))
+        card_data = cursor.fetchone()  # Fetch a single record
+        
+        if not card_data:
+            raise HTTPException(status_code=404, detail=f"Card with ID {card_id} not found")
+        
+        return card_data
+
+    except mysql.connector.Error as err:
+        print("Database error:", err)
+        raise HTTPException(status_code=400, detail=f"Database error: {err}")
+    
     finally:
         cursor.close()
         connection.close()
