@@ -8,7 +8,7 @@ from azure.storage.blob import BlobServiceClient, BlobClient
 import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-from DB_Interface import add_friend2, get_card_data, get_cards, get_friends, get_profile_data, insert_card_data, login_user, register_user, remove_friend, search_friends, search_my_cards, update_profile
+from DB_Interface import add_friend2, get_card_data, get_cards, get_friends, get_profile_data, insert_card_data, insert_profile, login_user, register_user, remove_friend, search_friends, search_my_cards, update_profile
 
 app = FastAPI()
 
@@ -144,3 +144,9 @@ async def profile(data: int = Query(...)):
     card = get_card_data(data)
     logging.info("Profile data endpoint after function call")
     return card
+
+@app.post("/new-profile")
+async def insertProfile(request: Request, data: int = Query(...)):
+    user_data = await request.json()
+    response = insert_profile(data, user_data)
+    return response

@@ -37,16 +37,15 @@ def register_user(user_data: dict):
         # Insert into Profiles table with default values for optional fields
         query_profiles = """INSERT INTO Profiles (user_id, profile_title, primary_phone, secondary_phone, 
                               email1, email2, address1, address2, company_name, city, pincode, country) 
-                              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         cursor.execute(query_profiles, (
             user_id, 
             user_data['profile_title'], 
             user_data['primary_phone'], 
             user_data.get('secondary_phone'),  # Optional field
-            user_data['email1'], 
+            user_data['email1'],
             user_data.get('email2'),  # Optional field
             user_data['address1'], 
-            user_data.get('address2', ''),  # Optional field
             user_data['company_name'], 
             user_data['city'], 
             user_data['pincode'], 
@@ -589,6 +588,43 @@ def get_card_data(card_id: int):
 
     except mysql.connector.Error as err:
         print("Database error:", err)
+        raise HTTPException(status_code=400, detail=f"Database error: {err}")
+    
+    finally:
+        cursor.close()
+        connection.close()
+
+def insert_profile(user_id: int, profile_data: dict):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        # Insert into Profiles table
+        query_profiles = """INSERT INTO Profiles (user_id, profile_title, primary_phone, secondary_phone, 
+                              email1, email2, address1, company_name, city, pincode, country 
+                              designation, qualification)  
+                              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        cursor.execute(query_profiles, (
+            user_id, 
+            profile_data['profile_title'], 
+            profile_data['primary_phone'], 
+            profile_data.get('secondary_phone'),  # Optional field
+            profile_data['primary_email'], 
+            profile_data.get('secondary_email'),  # Optional field
+            profile_data['address'], 
+            profile_data['company_name'], 
+            profile_data['city'], 
+            profile_data['pincode'], 
+            profile_data['country'],
+            profile_data.get('card_designation', ''),  # Optional field with default empty string
+            profile_data.get('user_qualification', '')
+        ))
+
+        connection.commit()
+    
+    except mysql.connector.Error as err:
+        connection.rollback()
+        print("Database error:", err)  # Debugging
         raise HTTPException(status_code=400, detail=f"Database error: {err}")
     
     finally:
