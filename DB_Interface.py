@@ -601,7 +601,7 @@ def insert_profile(user_id: int, profile_data: dict):
     try:
         # Insert into Profiles table
         query_profiles = """INSERT INTO Profiles (user_id, profile_title, primary_phone, secondary_phone, 
-                              email1, email2, address1, company_name, city, pincode, country 
+                              email1, email2, address1, company_name, city, pincode, country, 
                               designation, qualification)  
                               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         cursor.execute(query_profiles, (
