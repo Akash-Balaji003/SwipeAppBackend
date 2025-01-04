@@ -616,8 +616,8 @@ def insert_profile(user_id: int, profile_data: dict):
             profile_data['city'], 
             profile_data['pincode'], 
             profile_data['country'],
-            profile_data.get('card_designation', ''),  # Optional field with default empty string
-            profile_data.get('user_qualification', '')
+            profile_data.get('card_designation'),  # Optional field with default empty string
+            profile_data.get('user_qualification')
         ))
 
         connection.commit()
