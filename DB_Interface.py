@@ -36,7 +36,7 @@ def register_user(user_data: dict):
 
         # Insert into Profiles table with default values for optional fields
         query_profiles = """INSERT INTO Profiles (user_id, profile_title, primary_phone, secondary_phone, 
-                              email1, email2, address1, address2, company_name, city, pincode, country) 
+                              email1, email2, address1, company_name, city, pincode, country) 
                               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         cursor.execute(query_profiles, (
             user_id, 
