@@ -32,13 +32,18 @@ async def get_designations():
 
 @app.post("/register")
 async def register(request: Request):
+    logging.info("Incoming POST request to /register")
     try:
+        logging.info("Reading JSON data from the request body...")
         user_data = await request.json()
         print("Received user data:", user_data)  # Debugging
+        logging.info("Received user data: %s", user_data)
         register_user(user_data)
+        logging.info("User registration completed successfully.")
         return {"message": "User registered successfully"}
     except Exception as e:
         print("Error:", str(e))  # Debugging
+        logging.error("Error during user registration: %s", str(e), exc_info=True)
         raise HTTPException(status_code=400, detail=f"Bad request: {str(e)}")
 
 @app.post("/login")
