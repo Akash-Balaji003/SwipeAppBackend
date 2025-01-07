@@ -8,7 +8,7 @@ from azure.storage.blob import BlobServiceClient, BlobClient
 import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-from DB_Interface import add_friend2, get_card_data, get_cards, get_friends, get_profile_data, insert_card_data, insert_profile, login_user, register_user, remove_friend, search_friends, search_my_cards, update_profile
+from DB_Interface import add_friend2, check_account, get_card_data, get_cards, get_friends, get_profile_data, insert_card_data, insert_profile, login_user, register_user, remove_friend, search_friends, search_my_cards, update_profile
 
 app = FastAPI()
 
@@ -150,3 +150,15 @@ async def insertProfile(request: Request, data: int = Query(...)):
     user_data = await request.json()
     response = insert_profile(data, user_data)
     return response
+
+@app.post("/check-user")
+async def checkAccount(request: Request):
+    try:
+        user_data = await request.json()
+        logging.info("Received profile data:", user_data)  # Debugging
+        result = check_account(user_data)
+        return result
+    
+    except Exception as e:
+        logging.error("Error:", str(e))  # Debugging
+        raise HTTPException(status_code=400, detail=f"Bad request: {str(e)}")

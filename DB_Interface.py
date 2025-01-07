@@ -630,3 +630,33 @@ def insert_profile(user_id: int, profile_data: dict):
     finally:
         cursor.close()
         connection.close()
+
+def check_account(user_data: dict):
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        # Check for existing account based on phone number or email
+        query = """
+        SELECT phone_number
+        FROM Users
+        WHERE phone_number = %s
+        """
+        cursor.execute(query, (
+            user_data['phone_number'],
+        ))
+        
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            return {"message": "This number or email already has an account"}
+
+        return {"message": "No account exists with the provided phone number or email."}
+    
+    except mysql.connector.Error as err:
+        print("Database error:", err)  # Debugging
+        raise HTTPException(status_code=400, detail=f"Database error: {err}")
+    
+    finally:
+        cursor.close()
+        connection.close()
