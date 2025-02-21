@@ -3,7 +3,6 @@ import qrcode
 from io import BytesIO
 from fastapi import FastAPI, HTTPException, Query, Request
 import json
-from azure.storage.blob import BlobServiceClient, BlobClient
 
 import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -12,23 +11,78 @@ from DB_Interface import add_friend2, check_account, get_card_data, get_cards, g
 
 app = FastAPI()
 
-connection_string = "DefaultEndpointsProtocol=https;AccountName=designations;AccountKey=7TGa2pK+6Do7Ehu02h0cqY7BJAQS5AfTEzzvxhLU3wp7uDNVME37yFYJYCHJbCOYy0FQJkOJsFKZ+AStnW7WFQ==;EndpointSuffix=core.windows.net"  # Get this from Azure Portal
-container_name = "designations-list"
-blob_name = "designations.json"
-
-blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+# Hardcoded JSON data
+designations = [
+    "Marketing Manager",
+    "Digital Marketing Specialist",
+    "Brand Manager",
+    "Content Marketing Manager",
+    "Social Media Manager",
+    "SEO Specialist",
+    "SEM Specialist",
+    "Product Marketing Manager",
+    "Marketing Coordinator",
+    "Marketing Analyst",
+    "Chief Marketing Officer",
+    "CMO",
+    "Public Relations Manager",
+    "Copywriter",
+    "Creative Director",
+    "Advertising Manager",
+    "Growth Marketer",
+    "Campaign Manager",
+    "Marketing Strategist",
+    "Influencer Marketing Manager",
+    "Event Coordinator",
+    "Affiliate Marketing Specialist",
+    "Market Research Analyst",
+    "Email Marketing Specialist",
+    "Media Buyer",
+    "Partnerships Manager",
+    "Customer Relationship Manager",
+    "Performance Marketing Manager",
+    "Software Developer",
+    "Full Stack Developer",
+    "Frontend Developer",
+    "Backend Developer",
+    "Data Scientist",
+    "Machine Learning Engineer",
+    "Cloud Solutions Architect",
+    "DevOps Engineer",
+    "Network Administrator",
+    "IT Support Specialist",
+    "IT Project Manager",
+    "Cybersecurity Analyst",
+    "Database Administrator",
+    "IT Consultant",
+    "Business Analyst",
+    "Systems Analyst",
+    "Product Manager",
+    "QA Engineer",
+    "Scrum Master",
+    "Software Architect",
+    "Technical Support Engineer",
+    "Chief Information Officer",
+    "CIO",
+    "Chief Technology Officer",
+    "CTO",
+    "Chief Financial Officer",
+    "CFO",
+    "Chief Executive Officer",
+    "CEO",
+    "IT Operations Manager",
+    "AI Engineer",
+    "Mobile App Developer",
+    "UI/UX Designer",
+    "Blockchain Developer",
+    "Game Developer",
+    "IT Infrastructure Manager",
+    "IT Security Manager"
+]
 
 @app.get("/get-designations")
 async def get_designations():
-    # Download the blob
-    download_stream = blob_client.download_blob()
-    json_data = download_stream.readall().decode('utf-8')
-
-    # Parse JSON data
-    designations = json.loads(json_data)
-
-    return designations
+    return designations  # Return the hardcoded list
 
 @app.post("/register")
 async def register(request: Request):
