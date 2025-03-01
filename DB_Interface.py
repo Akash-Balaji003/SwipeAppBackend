@@ -284,7 +284,7 @@ def get_friends(profile_id: int):
         cursor.close()
         connection.close()
 
-def add_friend2(profile_id1: int, profile_id2: int, remarks: str):
+def add_friend2(profile_id1: int, profile_id2: int, remarks: str, location: str):
     if profile_id1 == profile_id2:
         print("A profile cannot friend itself.")
         return {"message": "A profile cannot friend itself."}
@@ -331,10 +331,10 @@ def add_friend2(profile_id1: int, profile_id2: int, remarks: str):
         # Insert the friendship along with remarks
         cursor.execute(
             """
-            INSERT INTO friends (profile_id1, profile_id2, remarks)
-            VALUES (%s, %s, %s)
+            INSERT INTO friends (profile_id1, profile_id2, remarks, location)
+            VALUES (%s, %s, %s, %s)
             """,
-            (profile_id1, profile_id2, remarks)
+            (profile_id1, profile_id2, remarks, location)
         )
         connection.commit()
         return {"message": "Friend added successfully"}

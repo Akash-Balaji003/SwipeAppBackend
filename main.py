@@ -133,8 +133,8 @@ async def qrGenerator(data: int = Query(...)):
     return {"qr_code_base64": img_str}
 
 @app.get("/add-friend")
-async def addFriend(data1: int = Query(...), data2: int = Query(...), remarks: str = Query(...)):
-    add_friend_result = add_friend2(data1, data2, remarks)
+async def addFriend(data1: int = Query(...), data2: int = Query(...), remarks: str = Query(...), location: str = Query(...)):
+    add_friend_result = add_friend2(data1, data2, remarks, location)
     return add_friend_result
 
 @app.get("/remove-friend")
