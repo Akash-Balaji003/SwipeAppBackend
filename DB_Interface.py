@@ -452,7 +452,8 @@ def search_friends(profile_id: int, search_term: str):
             END AS friend_profile_id,
             p.profile_title,
             u.common_name,
-            f.remarks
+            f.remarks,
+            f.location
         FROM friends f
         JOIN profiles p ON p.profile_id = 
             CASE 
