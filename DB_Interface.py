@@ -465,11 +465,12 @@ def search_friends(profile_id: int, search_term: str):
               u.common_name LIKE %s   -- Search in user's common name
               OR p.profile_title LIKE %s  -- Search in profile title
               OR f.remarks LIKE %s    -- Search in remarks
+              OR f.location LIKE %s
           )
         """
         
         # Execute the query with search term in all fields
-        cursor.execute(query, (profile_id, profile_id, profile_id, profile_id, f"%{search_term}%", f"%{search_term}%", f"%{search_term}%"))
+        cursor.execute(query, (profile_id, profile_id, profile_id, profile_id, f"%{search_term}%", f"%{search_term}%", f"%{search_term}%", f"%{search_term}%"))
         friends = cursor.fetchall()
 
         return friends
